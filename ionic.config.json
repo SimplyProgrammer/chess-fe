@@ -1,0 +1,7 @@
+{
+  "name": "chess-fe",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}

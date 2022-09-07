@@ -1,0 +1,7 @@
+{
+  "appId": "org.ugp.chess.fe",
+  "appName": "chess-fe",
+  "webDir": "dist",
+  "npmClient": "npm",
+  "bundledWebRuntime": false
+}

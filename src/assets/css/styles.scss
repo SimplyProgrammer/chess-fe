@@ -1,0 +1,68 @@
+@import "./tailwind.css";
+
+.ion-text {
+	color: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.4)
+}
+
+.ion-border {
+	border-color: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.4)
+}
+
+.ion-inner-p-0 {
+	--inner-padding-end: 0;
+}
+
+ion-tab-bar {
+    --color-selected: #000 !important;
+}
+
+.fade-enter-active {
+	transition: 0.4s;
+}
+
+.fade-leave-active {
+	transition: 0.4s;
+	position: absolute;
+}
+
+.fade-enter-from {
+	opacity: 0;
+}
+
+.fade-leave-to {
+	opacity: 0;
+}
+
+
+.list-enter-active {
+	transition: 0.4s;
+}
+
+.list-leave-active {
+	transition: 0.4s;
+	position: absolute;
+}
+
+.list-enter-from {
+	transform: scale(0.6);
+	opacity: 0;
+}
+
+.list-enter-to {
+	transform: scale(1);
+	opacity: 1;
+}
+
+.list-leave-from {
+	transform: scale(1);
+	opacity: 1;
+}
+
+.list-leave-to {
+	transform: scale(0.6);
+	opacity: 0;
+}
+
+.list-move {
+	transition: 0.4s all;
+}
