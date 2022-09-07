@@ -6,16 +6,43 @@ export default {
 	methods: {
 		assets(resourcesName) { //Get resource
 			return require(process.env.VUE_APP_ORIG_ASSETS + resourcesName);
-		},
-
-		piece(color, name = "p", sprite = null) {
-			return {name, color, sprite: sprite == null ? require("@/assets/textures/" + name + color + ".png") : sprite};
 		}
 	},
 
 	data() {
 		return {
 			origAssets: process.env.VUE_APP_ORIG_ASSETS,
+
+			async modal(modalComponent, componentProps = {}) {
+				if (await this.modalController.getTop())
+					return {
+						onDidDismiss: () => {
+							return {};
+						}
+					};
+	
+				const modal = await this.modalController.create({
+					component: modalComponent,
+					breakpoints: [0, 1],
+					initialBreakpoint: 1,
+					componentProps: componentProps
+				});
+				modal.present();
+	
+				return modal;
+			},
+	
+			async toast(message, color = "success", duration = 2500) {
+				const toast = await this.toastController.create({
+					color: color,
+					message: message,
+					duration: duration,
+				});
+				toast.present();
+				toast.onclick = () => toast.dismiss();
+	
+				return toast;
+			},
 
 			//Utlity pre icony, nemusim zvlast importovat jak blb kazdu ikonu proste napisem napr :icon="icons.add"
 			icons: new Proxy(Object.keys(AllIcons).reduce((map, elem) => {

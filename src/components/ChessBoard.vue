@@ -11,6 +11,8 @@
 </template>
 
 <script>
+import Axios from "axios";
+
 export default {
 	data() {
 		return {
@@ -30,18 +32,25 @@ export default {
 		},
 		pieces: {
 			type: Array
+		},
+		session: {
+			type: String,
 		}
 	},
 	
 	mounted() {
-		// console.log(this.pieces);
-		// if (this.defaltPieces)
-		// 	this.pieces = this.defaltPieces;
+		for (let x = 0; x < this.pieces.length; x++) {
+			for (let y = 0; y < this.pieces[x].length; y++) {
+				const element = this.pieces[x][y];
+				if (element)
+					element.sprite = require("@/assets/textures/" + element.type + element.color + ".png");
+			}
+		}
 		console.log(this.pieces);
 	},
 
 	methods: {
-		onTileClicked(x, y) {
+		async onTileClicked(x, y) {
 			this.$emit('onTileClicked', x, y)
 
 			//Move piece
@@ -50,6 +59,10 @@ export default {
 				if (this.canPieceMoveAt(x, y)) {
 					this.pieces[this.selected.fromPos.x][this.selected.fromPos.y] = null;
 					this.pieces[x][y] = this.selected;
+					this.selected.movmentMetrix = null;
+
+					const data = (await Axios.get(this.session + `/move/${this.selected.fromPos.x}/${this.selected.fromPos.y}/${x}/${y}`)).data;
+					
 
 					this.$emit('onPieceMove', x, y, this.selected)
 
@@ -65,7 +78,7 @@ export default {
 			{
 				const selected = this.select(x, y);
 				selected.fromPos = {x, y};
-				selected.movmentMetrix = this.generateMovmentMetrix(selected);
+				selected.movmentMetrix = await this.generateMovmentMetrix(selected, x, y);
 			}
 		},
 
@@ -87,15 +100,14 @@ export default {
 			}
 		},
 
-		generateMovmentMetrix(piece) {
+		async generateMovmentMetrix(piece, x, y) {
 			if (piece.movmentMetrix)
 				return piece.movmentMetrix;
-			console.log(123);
-			return [
-				[],
-				[],
-				[null, true]
-			];
+			
+			const data = (await Axios.get(this.session + `/movmentMetrix/${x}/${y}`)).data[0];
+			console.log(data);
+
+			return data
 		},
 
 		canPieceMoveAt(x, y) {
