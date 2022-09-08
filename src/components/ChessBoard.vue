@@ -36,7 +36,7 @@ export default {
 		session: {
 			type: String,
 		},
-		whoStarts: {
+		onTurn: {
 			type: Number,
 			default: 0
 		},
@@ -118,7 +118,7 @@ export default {
 		},
 
 		canPieceMoveAt(x, y) {
-			return this.selected?.isSelected && !this.isOnMove(x, y) && this.selected?.movmentMetrix?.[x]?.[y];
+			return this.selected?.isSelected && !this.isOnMove(x, y) && this.selected?.movmentMetrix?.[y]?.[x];
 		},
 
 		get(x, y) {
