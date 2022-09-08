@@ -1,10 +1,10 @@
 <template>
 	<div class="flex justify-center items-center h-full">
-		<ChessBoard v-if="gameChessBoard" class="lg:w-[50%] w-[90%]" :pieces="gameChessBoard" :session="currentGameSession" @onTileClicked="onTileClicked" ref="chessBoard"></ChessBoard>
+		<ChessBoard v-if="game" class="lg:w-[50%] w-[90%]" v-bind="game" :api="api + 'game/'" @onTileClicked="onTileClicked" ref="chessBoard"></ChessBoard>
 		<div class="flex flex-col items-center" v-else>
-			<h1 class="text-9xl mb-32">Simple Chess</h1>
+			<h1 class="text-9xl mb-32 text-center">Simple Chess</h1>
 			<div class="flex flex-col items-center w-3/5">
-				<ion-button class="w-full font-bold" @click="startNewGame">{{sessionInput ? 'Join existing game' : 'Start new game'}}</ion-button>
+				<ion-button class="w-full font-bold" @click="startGame(sessionInput)">{{sessionInput ? 'Join existing game' : 'Start new game'}}</ion-button>
 				<ion-input v-model="sessionInput" class="rounded-md bg-slate-300 mt-3 ion-padding-horizontal" placeholder="Or enter token of game"></ion-input>
 				<ion-button class="mt-10 font-bold w-7/12" @click="browseGames">Browse existing games</ion-button>
 			</div>
@@ -33,9 +33,9 @@ export default {
 			// 	[this.piece(1, "r"), this.piece(1, "n"), this.piece(1, "b"), this.piece(1, "q"), this.piece(1, "k"), this.piece(1, "b"), this.piece(1, "n"), this.piece(1, "r")]
 			// ],
 
-			currentGameSession: null,
-			gameChessBoard: null,
-			sessionInput: null
+			game: null,
+			sessionInput: null,
+			api: process.env.VUE_APP_API
 		}
 	},
 
@@ -50,21 +50,17 @@ export default {
 			return this.startNewGame();
 		},
 
-		async startNewGame() {
+		async startGame(session = null) {
 			try {
-				const data = (await Axios.get(process.env.VUE_APP_API + "game/new")).data;
-				this.startGame(data);
+				if (session) 
+					return this.game  = (await Axios.get(process.env.VUE_APP_API + "game/" + session)).data[0];
+
+				const data = (await Axios.get(process.env.VUE_APP_API + "game/new")).data[0];
+				return this.game = data;
 			}
 			catch (e) {
 				this.toast(e, "danger");
 			}
-		},
-
-		async startGame(session) {
-			this.currentGameSession = process.env.VUE_APP_API + "game/" + session;
-
-			this.gameChessBoard = (await Axios.get(this.currentGameSession)).data[0].pieces;
-			console.error(this.gameChessBoard);
 		},
 
 		async browseGames() {
@@ -72,7 +68,7 @@ export default {
 
 			const { data } = await this.gameBrowserModal.onDidDismiss();
 			if (data)
-				this.startGame(data.uuid);
+				this.startGame(data.id);
 		},
 
 		onTileClicked(x, y) {
