@@ -48,9 +48,9 @@ export default {
 	mounted() {
 		for (let x = 0; x < this.pieces.length; x++) {
 			for (let y = 0; y < this.pieces[x].length; y++) {
-				const element = this.pieces[x][y];
-				if (element)
-					element.sprite = require("@/assets/textures/" + element.type + element.color + ".png");
+				const piece = this.get(x, y);
+				if (piece)
+					piece.sprite = require("@/assets/textures/" + piece.type + piece.color + ".png");
 			}
 		}
 		if (this.onTurn)
@@ -67,7 +67,13 @@ export default {
 				if (this.canPieceMoveAt(x, y)) {
 					this.put(this.selected.fromPos.x, this.selected.fromPos.y, null);
 					this.put(x, y, this.selected);
-					this.selected.movmentMetrix = null;
+					for (let x = 0; x < this.pieces.length; x++) {
+						for (let y = 0; y < this.pieces[x].length; y++) {
+							const piece = this.get(x, y);
+							if (piece)
+								piece.movmentMetrix = null;
+						}
+					}
 
 					const data = (await Axios.get(this.api + this.session + `/move/${this.selected.fromPos.x}/${this.selected.fromPos.y}/${x}/${y}`)).data;
 
