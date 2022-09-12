@@ -76,7 +76,7 @@ export default {
 					}
 
 					const data = (await Axios.get(this.api + this.session + `/move/${this.selected.fromPos.x}/${this.selected.fromPos.y}/${x}/${y}`)).data;
-
+					console.log(data);
 					this.$emit('onPieceMove', x, y, this.selected)
 
 					this.currentlyPlaying ^= 1;
