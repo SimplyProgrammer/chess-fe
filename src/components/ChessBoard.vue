@@ -4,7 +4,7 @@
 			<div v-for="(col, x) in w" :key="x" class="w-full h-full relative aspect-[1]" :class="[{'hover:bg-slate-600': isOnMove(x, y)}, {'bg-slate-600': get(x, y)?.isSelected}, (x + y) % 2 ? 'black' : 'white']" @click="onTileClicked(x, y)">
 				<div v-if="canPieceMoveAt(x, y)" class="absolute w-[50%] h-[50%] top-1/4 left-1/4 rounded-full bg-slate-500 opacity-70"></div>
 				<img :src="get(x, y)?.sprite">
-				<p class="absolute top-1/4 left-1/4 text-cyan-400">[{{x}}, {{y}}]</p>
+				<!-- <p class="absolute top-1/4 left-1/4 text-cyan-400">[{{x}}, {{y}}]</p> -->
 			</div>
 		</template>
 	</div>
@@ -12,6 +12,7 @@
 
 <script>
 import Axios from "axios";
+import {alertController} from "@ionic/vue";
 
 export default {
 	data() {
@@ -40,7 +41,10 @@ export default {
 			type: Number,
 			default: 0
 		},
-		api: {
+		moveUrl: {
+			type: String
+		},
+		movmentMetrixUrl: {
 			type: String
 		}
 	},
@@ -75,8 +79,21 @@ export default {
 						}
 					}
 
-					const data = (await Axios.get(this.api + this.session + `/move/${this.selected.fromPos.x}/${this.selected.fromPos.y}/${x}/${y}`)).data;
-					console.log(data);
+					const data = (await Axios.get(this.moveUrl + `?x=${this.selected.fromPos.x}&y=${this.selected.fromPos.y}&newX=${x}&newY=${y}`)).data;
+
+					if (data.isStalemate || (data.isCheck && data.canKingMove))
+					{
+						const alert = await alertController.create({
+							header: "GOOD GAME!",
+							subHeader: data.isStalemate ? "This looks like a draw!" : (this.currentlyPlaying == 0 ? "Black" : "White") + " has won!",
+							// message: 'This is an alert!',
+							buttons: ['OK'],
+							mode: "md"
+						});
+
+						await alert.present();
+					}
+					
 					this.$emit('onPieceMove', x, y, this.selected)
 
 					this.currentlyPlaying ^= 1;
@@ -117,10 +134,10 @@ export default {
 			if (piece.movmentMetrix)
 				return piece.movmentMetrix;
 			
-			const data = (await Axios.get(this.api + this.session + `/movmentMetrix/${x}/${y}`)).data[0];
-			console.log(data);
+			const data = (await Axios.get(this.movmentMetrixUrl + `?x=${x}&y=${y}`)).data[0];
+			// console.log(data);
 
-			return data
+			return data;
 		},
 
 		canPieceMoveAt(x, y) {

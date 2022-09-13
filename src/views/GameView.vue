@@ -1,15 +1,30 @@
 <template>
-	<div class="flex justify-center items-center h-full">
-		<ChessBoard v-if="game" class="lg:w-[50%] w-[90%]" v-bind="game" :api="api + 'game/'" @onTileClicked="onTileClicked" ref="chessBoard"></ChessBoard>
-		<div class="flex flex-col items-center" v-else>
-			<h1 class="text-9xl mb-32 text-center">Simple Chess</h1>
-			<div class="flex flex-col items-center w-3/5">
-				<ion-button class="w-full font-bold" @click="startGame(sessionInput)">{{sessionInput ? 'Join existing game' : 'Start new game'}}</ion-button>
-				<ion-input v-model="sessionInput" class="rounded-md bg-slate-300 mt-3 ion-padding-horizontal" placeholder="Or enter token of game"></ion-input>
-				<ion-button class="mt-10 font-bold w-7/12" @click="browseGames">Browse existing games</ion-button>
+	<ion-content>
+		<div class="flex justify-center items-center h-full">
+			<div class="w-full h-full" v-if="game">
+				<p class="text-center bg-slate-600 text-white border-0 border-black border-solid border-b-4 m-0 py-1" @dblclick="copySessionId">{{game.session}}</p>
+				<div class="flex justify-center items-center h-[90%]">
+					<ChessBoard v-if="game" class="lg:w-[46%] w-[90%]" v-bind="game" 
+						:moveUrl="api + 'game/' + game.session + '/move'" 
+						:movmentMetrixUrl="api + 'game/' + game.session + '/movmentMetrix'"
+						@onTileClicked="onTileClicked" ref="chessBoard">
+					</ChessBoard>
+				</div>
+				<footer class="absolute bottom-0 flex justify-between w-full border-2 border-black border-solid">
+					<p class="bg-black text-white m-0 h-12 w-full">Black</p>
+					<p class="text-black m-0 h-12 w-full">White</p>
+				</footer>
+			</div>
+			<div class="flex flex-col items-center" v-else>
+				<h1 class="text-9xl mb-32 text-center">Simple Chess</h1>
+				<div class="flex flex-col items-center w-3/5">
+					<ion-button class="w-full font-bold" @click="startGame(sessionInput)">{{sessionInput ? 'Join existing game' : 'Start new game'}}</ion-button>
+					<ion-input v-model="sessionInput" class="rounded-md bg-slate-300 mt-3 ion-padding-horizontal" placeholder="Or enter token of game"></ion-input>
+					<ion-button class="mt-10 font-bold w-7/12" @click="browseGames">Browse existing games</ion-button>
+				</div>
 			</div>
 		</div>
-	</div>
+	</ion-content>
 </template>
 
 <script>
@@ -69,6 +84,16 @@ export default {
 			const { data } = await this.gameBrowserModal.onDidDismiss();
 			if (data)
 				this.startGame(data.id);
+		},
+
+		async copySessionId() {
+			try {
+				await navigator.clipboard.writeText(this.game.session);
+				this.toast("Game id coppied!");
+			} 
+			catch (e) {
+				console.error(e);
+			}
 		},
 
 		onTileClicked(x, y) {
