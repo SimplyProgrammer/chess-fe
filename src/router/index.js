@@ -1,20 +1,29 @@
 import { createRouter, createWebHistory } from "@ionic/vue-router";
-import GameView from "../views/GameView.vue";
+import GameView from "@/views/GameView.vue";
+import HomeView from "@/views/HomeView.vue";
+import Kokot from "@/views/Kokot.vue";
 
 const routes = [
 	{
-		path: "",
-		redirect: "/game"
+		path: "/",
+		name: "Home",
+		component: HomeView,
 	},
 	{
-		path: "/game",
+		path: "/game/:session",
+		name: "Game",
 		component: GameView,
+	},
+	{
+		path: "/kokot",
+		name: "Kokot",
+		component: Kokot,
 	}
 ]
 
 const router = createRouter({
-	history: createWebHistory(process.env.BASE_URL),
-	routes
+	history: createWebHistory(),
+	routes,
 });
 
 export default router

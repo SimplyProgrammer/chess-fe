@@ -1,9 +1,9 @@
 <template>
 	<div class="grid grid-cols-8">
 		<template v-for="(row, y) in h" :key="y">
-			<div v-for="(col, x) in w" :key="x" class="w-full h-full relative aspect-[1]" :class="[{'hover:bg-slate-600': isOnMove(x, y)}, {'bg-slate-600': get(x, y)?.isSelected}, (x + y) % 2 ? 'black' : 'white']" @click="onTileClicked(x, y)">
+			<div v-for="(col, x) in w" :key="x" class="relative aspect-[1]" :class="[{'hover:bg-slate-600': isOnMove(x, y)}, {'bg-slate-600': get(x, y)?.isSelected}, (x + y) % 2 ? 'black' : 'white']" @click="onTileClicked(x, y)">
 				<div v-if="canPieceMoveAt(x, y)" class="absolute w-[50%] h-[50%] top-1/4 left-1/4 rounded-full bg-slate-500 opacity-70"></div>
-				<img :src="get(x, y)?.sprite">
+				<img :src="get(x, y)?.sprite" class="block">
 				<!-- <p class="absolute top-1/4 left-1/4 text-cyan-400">[{{x}}, {{y}}]</p> -->
 			</div>
 		</template>
@@ -156,6 +156,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.flip {
+	transform: scaleY(-1);
+
+	img.block {
+		transform: scaleY(-1);
+	}
+}
+
 .white {
 	background: lightgray;
 }
