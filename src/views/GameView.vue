@@ -44,7 +44,27 @@ export default {
 	},
 
 	async mounted() {
-		this.game = (await Axios.get(process.env.VUE_APP_API + "game/" + this.$route.params.session)).data[0];
+		const comp = this;
+
+		this.ws = new WebSocket(process.env.VUE_APP_API.replace(/https?/, "ws") + "game/" + this.$route.params.session);
+		this.ws.onopen = function(event) {
+			console.log("Server connected." , event);
+		};
+		this.ws.onmessage = function(event) {
+			const data = JSON.parse(event.data)[0];
+			console.log(data);
+			if (data.type == "init")
+			{
+				comp.game = data;
+			}
+		};
+		this.ws.onclose = function (event){
+			console.log("Server disconnected." , event);
+		};
+	},
+
+	unmounted() {
+		this.ws.close();
 	},
 
 	methods: {
