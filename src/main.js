@@ -38,7 +38,7 @@ Axios.defaults.httpsAgent = new https.Agent({
 	rejectUnauthorized: false,
 });
 
-const app = createApp(App).use(IonicVue).use(router).mixin(GlobalMixins);
+const app = createApp(App).use(IonicVue).mixin(GlobalMixins).use(router);
 
 router.isReady().then(() => {
 	app.mount("#app");

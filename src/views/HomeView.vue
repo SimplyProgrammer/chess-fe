@@ -1,16 +1,14 @@
 <template>
-	<ion-content>
-		<div class="flex justify-center items-center h-full">
-			<div class="flex flex-col items-center">
-				<h1 class="text-9xl mb-32 text-center">Simple Chess</h1>
-				<div class="flex flex-col items-center w-3/5">
-					<ion-button class="w-full font-bold" @click="startGame(sessionInput)">{{sessionInput ? 'Join existing game' : 'Start new game'}}</ion-button>
-					<ion-input v-model="sessionInput" class="rounded-md bg-slate-300 mt-3 ion-padding-horizontal" placeholder="Or enter token of game"></ion-input>
-					<ion-button class="mt-10 font-bold w-7/12" @click="browseGames">Browse existing games</ion-button>
-				</div>
+	<div class="flex justify-center items-center h-full">
+		<div class="flex flex-col items-center">
+			<h1 class="text-9xl mb-32 text-center">Simple Chess</h1>
+			<div class="flex flex-col items-center w-3/5">
+				<ion-button class="w-full font-bold" @click="startGame(sessionInput)">{{sessionInput ? 'Join existing game' : 'Start game'}}</ion-button>
+				<ion-input v-model="sessionInput" class="rounded-md bg-slate-300 mt-3 ion-padding-horizontal" placeholder="Or enter token of game"></ion-input>
+				<!-- <ion-button class="mt-10 font-bold w-7/12" @click="browseGames">Browse existing games</ion-button> -->
 			</div>
 		</div>
-	</ion-content>
+	</div>
 </template>
 
 <script>
@@ -47,12 +45,12 @@ export default {
 		async startGame(session = null) {
 			try {
 				if (session) 
-					this.$router.push(session);
+					this.$router.push("/game/" + session);
 				else {
 
 					const data = (await Axios.get(process.env.VUE_APP_API + "game/new")).data[0];
 					console.log(data);
-					this.$router.push("/kokot");
+					this.$router.push("/game/" + data);
 				}
 			}
 			catch (e) {

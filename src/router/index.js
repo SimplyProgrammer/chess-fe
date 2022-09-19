@@ -1,7 +1,5 @@
 import { createRouter, createWebHistory } from "@ionic/vue-router";
-import GameView from "@/views/GameView.vue";
 import HomeView from "@/views/HomeView.vue";
-import Kokot from "@/views/Kokot.vue";
 
 const routes = [
 	{
@@ -12,12 +10,12 @@ const routes = [
 	{
 		path: "/game/:session",
 		name: "Game",
-		component: GameView,
+		component: () => import("@/views/GameView.vue"),
 	},
 	{
-		path: "/kokot",
-		name: "Kokot",
-		component: Kokot,
+		path: '/:catchAll(.*)',
+		name: 'NotFound',
+		component: () => import("@/views/NotFound.vue"),
 	}
 ]
 

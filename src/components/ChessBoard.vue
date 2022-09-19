@@ -1,7 +1,11 @@
 <template>
 	<div class="grid grid-cols-8">
 		<template v-for="(row, y) in h" :key="y">
-			<div v-for="(col, x) in w" :key="x" class="relative aspect-[1]" :class="[{'hover:bg-slate-600': isOnMove(x, y)}, {'bg-slate-600': get(x, y)?.isSelected}, (x + y) % 2 ? 'black' : 'white']" @click="onTileClicked(x, y)">
+			<div v-for="(col, x) in w" :key="x" class="relative aspect-[1]" :class="[{
+				'hover:bg-slate-600': isOnMove(x, y)},
+				{'bg-slate-600': get(x, y)?.isSelected}, 
+				(x + y) % 2 ? 'black' : 'white'
+			]" @click="onTileClicked(x, y)">
 				<div v-if="canPieceMoveAt(x, y)" class="absolute w-[50%] h-[50%] top-1/4 left-1/4 rounded-full bg-slate-500 opacity-70"></div>
 				<img :src="get(x, y)?.sprite" class="block">
 				<!-- <p class="absolute top-1/4 left-1/4 text-cyan-400">[{{x}}, {{y}}]</p> -->
@@ -11,9 +15,6 @@
 </template>
 
 <script>
-import Axios from "axios";
-import {alertController} from "@ionic/vue";
-
 export default {
 	data() {
 		return {
@@ -32,20 +33,18 @@ export default {
 			default: 8
 		},
 		pieces: {
-			type: Array
-		},
-		session: {
-			type: String,
+			type: Array,
+			required: true
 		},
 		onTurn: {
 			type: Number,
 			default: 0
 		},
-		moveUrl: {
-			type: String
+		getOnMoveData: {
+			type: Function
 		},
-		movmentMetrixUrl: {
-			type: String
+		getMovmentMetrix: {
+			type: Function
 		}
 	},
 	
@@ -69,6 +68,10 @@ export default {
 			if (this.selected)
 			{
 				if (this.canPieceMoveAt(x, y)) {
+					const data = await this.getOnMoveData(this.selected.fromPos.x, this.selected.fromPos.y, x, y);
+					if (!data)
+						return;
+
 					this.put(this.selected.fromPos.x, this.selected.fromPos.y, null);
 					this.put(x, y, this.selected);
 					for (let x = 0; x < this.pieces.length; x++) {
@@ -79,23 +82,11 @@ export default {
 						}
 					}
 
-					const data = (await Axios.get(this.moveUrl + `?x=${this.selected.fromPos.x}&y=${this.selected.fromPos.y}&newX=${x}&newY=${y}`)).data;
-
-					if (data.isStalemate || (data.isCheck && data.canKingMove))
-					{
-						const alert = await alertController.create({
-							header: "GOOD GAME!",
-							subHeader: data.isStalemate ? "This looks like a draw!" : (this.currentlyPlaying == 0 ? "Black" : "White") + " has won!",
-							// message: 'This is an alert!',
-							buttons: ['OK'],
-							mode: "md"
-						});
-
-						await alert.present();
-					}
-					
 					this.$emit('onPieceMove', x, y, this.selected)
 
+					if (data.isStalemate || (data.isCheck && !data.canMove))
+						this.$emit('onMate', data.isCheck, data.canMove, data.isStalemate, this.currentlyPlaying)
+					
 					this.currentlyPlaying ^= 1;
 					return this.deselect();
 				}
@@ -134,9 +125,7 @@ export default {
 			if (piece.movmentMetrix)
 				return piece.movmentMetrix;
 			
-			const data = (await Axios.get(this.movmentMetrixUrl + `?x=${x}&y=${y}`)).data[0];
-			// console.log(data);
-
+			const data = await this.getMovmentMetrix(x, y);;
 			return data;
 		},
 
