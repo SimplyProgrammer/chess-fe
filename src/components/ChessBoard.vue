@@ -1,8 +1,8 @@
 <template>
 	<div class="grid grid-cols-8">
 		<template v-for="(row, y) in h" :key="y">
-			<div v-for="(col, x) in w" :key="x" class="relative aspect-[1]" :class="[{
-				'hover:bg-slate-600': isOnMove(x, y)},
+			<div v-for="(col, x) in w" :key="x" class="relative aspect-[1]" :class="[
+				{'hover:bg-slate-600': isOnMove(x, y)},
 				{'bg-slate-600': get(x, y)?.isSelected}, 
 				(x + y) % 2 ? 'black' : 'white'
 			]" @click="onTileClicked(x, y)">
@@ -97,7 +97,7 @@ export default {
 		},
 
 		movePieceIfCan(toX, toY) {
-			if (this.canPieceMoveAt(toX, toY)) {
+			if (this.selected?.fromPos) {
 				const piece = this.selected;
 				this.put(this.selected.fromPos.x, this.selected.fromPos.y, null);
 				this.put(toX, toY, piece);

@@ -84,7 +84,7 @@ export default {
 		},
 
 		doMove(fromX, fromY, toX, toY) {
-			return this.ws.response("movmentMetrix", {fromX, fromY, toX, toY});
+			return this.ws.response("move", {fromX, fromY, toX, toY});
 		},
 
 		getMovmentMetrix(x, y) {
