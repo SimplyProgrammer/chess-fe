@@ -47,15 +47,14 @@ export default {
 		const comp = this;
 
 		this.ws = new WebSocket(process.env.VUE_APP_API.replace(/https?/, "ws") + "game/" + this.$route.params.session);
-		this.ws.onopen = function(event) {
+		this.ws.onopen = async function(event) {
 			console.log("Server connected." , event);
 		};
 		this.ws.onmessage = function(event) {
-			const data = JSON.parse(event.data)[0];
-			console.log(data);
+			const data = JSON.parse(event.data);
 			if (data.type == "init")
 			{
-				comp.game = data;
+				comp.game = data.data;
 			}
 		};
 		this.ws.onclose = function (event){
@@ -85,11 +84,11 @@ export default {
 		},
 
 		doMove(fromX, fromY, toX, toY) {
-			return Axios.get(process.env.VUE_APP_API + `game/${this.game.session}/move?x=${fromX}&y=${fromY}&newX=${toX}&newY=${toY}`).then(res => res.data);
+			return this.ws.response("movmentMetrix", {fromX, fromY, toX, toY});
 		},
 
 		getMovmentMetrix(x, y) {
-			return Axios.get(process.env.VUE_APP_API + `game/${this.game.session}/movmentMetrix?x=${x}&y=${y}`).then(res => res.data[0]);
+			return this.ws.response("movmentMetrix", {x, y});
 		},
 
 		async copySessionId() {

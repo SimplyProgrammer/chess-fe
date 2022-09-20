@@ -74,20 +74,13 @@ export default {
 
 					this.put(this.selected.fromPos.x, this.selected.fromPos.y, null);
 					this.put(x, y, this.selected);
-					for (let x = 0; x < this.pieces.length; x++) {
-						for (let y = 0; y < this.pieces[x].length; y++) {
-							const piece = this.get(x, y);
-							if (piece)
-								piece.movmentMetrix = null;
-						}
-					}
 
 					this.$emit('onPieceMove', x, y, this.selected)
 
 					if (data.isStalemate || (data.isCheck && !data.canMove))
 						this.$emit('onMate', data.isCheck, data.canMove, data.isStalemate, this.currentlyPlaying)
 					
-					this.currentlyPlaying ^= 1;
+					this.endTurn();
 					return this.deselect();
 				}
 
@@ -101,6 +94,25 @@ export default {
 				selected.fromPos = {x, y};
 				selected.movmentMetrix = await this.generateMovmentMetrix(selected, x, y);
 			}
+		},
+
+		movePieceIfCan(toX, toY) {
+			if (this.canPieceMoveAt(toX, toY)) {
+				const piece = this.selected;
+				this.put(this.selected.fromPos.x, this.selected.fromPos.y, null);
+				this.put(toX, toY, piece);
+			}
+		},
+
+		endTurn() {
+			for (let x = 0; x < this.pieces.length; x++) {
+				for (let y = 0; y < this.pieces[x].length; y++) {
+					const piece = this.get(x, y);
+					if (piece)
+						piece.movmentMetrix = null;
+				}
+			}
+			this.currentlyPlaying ^= 1;
 		},
 
 		isOnMove(x, y) {

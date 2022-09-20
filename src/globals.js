@@ -1,6 +1,27 @@
 import * as AllIcons from "ionicons/icons"; //Ion icons bs
 import { modalController, toastController } from "@ionic/vue"; //modalController, toastController...
 
+WebSocket.prototype.response = async function(requestType, requestData, timeout = 3000, mapping = {responseType: "type", responseBody: "data"}) {
+	const ws = this;
+	return await new Promise(function(resolve, reject) {
+		const responseListener = (res) => {
+			const resData = JSON.parse(res.data);
+
+			if (resData[mapping.responseType] == requestType) {
+				ws.removeEventListener('message', responseListener);
+				resolve(resData[mapping.responseBody]);
+			}
+		};
+		ws.addEventListener('message', responseListener);
+
+		ws.send(JSON.stringify({[mapping.responseType]: requestType, ...requestData}));
+		setTimeout(() => {
+			resolve(null);
+			ws.removeEventListener('message', responseListener);
+		}, timeout);
+	});
+};
+
 // Global utility
 export default {
 	methods: {
