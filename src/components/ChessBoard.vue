@@ -56,8 +56,7 @@ export default {
 					piece.sprite = require("@/assets/textures/" + piece.type + piece.color + ".png");
 			}
 		}
-		if (this.onTurn)
-			this.currentlyPlaying = this.onTurn;
+		this.currentlyPlaying = this.onTurn;
 	},
 
 	methods: {
@@ -98,9 +97,8 @@ export default {
 
 		movePieceIfCan(toX, toY) {
 			if (this.selected?.fromPos) {
-				const piece = this.selected;
 				this.put(this.selected.fromPos.x, this.selected.fromPos.y, null);
-				this.put(toX, toY, piece);
+				this.put(toX, toY, this.selected);
 			}
 		},
 
