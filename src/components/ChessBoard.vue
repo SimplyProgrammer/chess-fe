@@ -71,8 +71,7 @@ export default {
 					if (!data)
 						return;
 
-					this.put(this.selected.fromPos.x, this.selected.fromPos.y, null);
-					this.put(x, y, this.selected);
+					this.movePieceIfCan(x, y);
 
 					this.$emit('onPieceMove', x, y, this.selected)
 

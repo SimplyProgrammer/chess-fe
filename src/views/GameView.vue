@@ -44,7 +44,7 @@ export default {
 	},
 
 	async mounted() {
-		const comp = this;
+		const comp = this, board = this.$refs.chessBoard;
 
 		this.ws = new WebSocket(process.env.VUE_APP_API.replace(/https?/, "ws") + "game/" + this.$route.params.session);
 		this.ws.onopen = async function(event) {
@@ -52,9 +52,16 @@ export default {
 		};
 		this.ws.onmessage = function(event) {
 			const data = JSON.parse(event.data);
-			if (data.type == "init")
-			{
+			if (data.type == "init") {
 				comp.game = data.data;
+			}
+			else if (data.type == "notifyMove") {
+				console.log(board);
+				const piece = board.select(data.data.fromX, data.data.fromY);
+				piece.fromX = data.data.fromX;
+				piece.fromY = data.data.fromY;
+				console.log("notifyMove", data.data);
+				board.movePieceIfCan(data.data.toX, data.data.toY);
 			}
 		};
 		this.ws.onclose = function (event){
