@@ -44,8 +44,8 @@ export default {
 	},
 
 	async mounted() {
-		const comp = this, board = this.$refs.chessBoard;
-
+		const comp = this;
+		
 		this.ws = new WebSocket(process.env.VUE_APP_API.replace(/https?/, "ws") + "game/" + this.$route.params.session);
 		this.ws.onopen = async function(event) {
 			console.log("Server connected." , event);
@@ -56,16 +56,17 @@ export default {
 				comp.game = data.data;
 			}
 			else if (data.type == "notifyMove") {
-				console.log(board);
-				const piece = board.select(data.data.fromX, data.data.fromY);
-				piece.fromX = data.data.fromX;
-				piece.fromY = data.data.fromY;
-				console.log("notifyMove", data.data);
-				board.movePieceIfCan(data.data.toX, data.data.toY);
+				const board = comp.$refs.chessBoard, dt = data.data;
+
+				const piece = board.select(dt.fromX, dt.fromY);
+				piece.fromPos = {x: dt.fromX, y: dt.fromY};
+				console.log("notifyMove", piece);
+				board.movePieceIfCan(dt.toX, dt.toY);
 			}
 		};
 		this.ws.onclose = function (event){
 			console.log("Server disconnected." , event);
+			this.game = null;
 		};
 	},
 

@@ -96,6 +96,7 @@ export default {
 
 		movePieceIfCan(toX, toY) {
 			if (this.selected?.fromPos) {
+				console.log(this.selected.fromPos.x, this.selected.fromPos.y);
 				this.put(this.selected.fromPos.x, this.selected.fromPos.y, null);
 				this.put(toX, toY, this.selected);
 			}
