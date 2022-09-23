@@ -19,7 +19,7 @@ export default {
 	data() {
 		return {
 			selected: null,
-			currentlyPlaying: 0
+			onTurn: 0
 		}
 	},
 
@@ -36,7 +36,7 @@ export default {
 			type: Array,
 			required: true
 		},
-		onTurn: {
+		whoStarts: {
 			type: Number,
 			default: 0
 		},
@@ -45,18 +45,16 @@ export default {
 		},
 		getMovmentMetrix: {
 			type: Function
+		},
+		myColor: {
+			type: Number,
+			default: null
 		}
 	},
 	
 	mounted() {
-		for (let x = 0; x < this.pieces.length; x++) {
-			for (let y = 0; y < this.pieces[x].length; y++) {
-				const piece = this.get(x, y);
-				if (piece)
-					piece.sprite = require("@/assets/textures/" + piece.type + piece.color + ".png");
-			}
-		}
-		this.currentlyPlaying = this.onTurn;
+		this.onTurn = this.whoStarts;
+		console.log(this.onTurn, this.myColor);
 	},
 
 	methods: {
@@ -67,7 +65,7 @@ export default {
 			if (this.selected)
 			{
 				if (this.canPieceMoveAt(x, y)) {
-					const data = await this.getOnMoveData(this.selected.fromPos.x, this.selected.fromPos.y, x, y);
+					const data = await this.getOnMoveData(this.selected.pos.x, this.selected.pos.y, x, y);
 					if (!data)
 						return;
 
@@ -76,10 +74,9 @@ export default {
 					this.$emit('onPieceMove', x, y, this.selected)
 
 					if (data.isStalemate || (data.isCheck && !data.canMove))
-						this.$emit('onMate', data.isCheck, data.canMove, data.isStalemate, this.currentlyPlaying)
+						this.$emit('onMate', data.isCheck, data.canMove, data.isStalemate, this.onTurn)
 					
-					this.endTurn();
-					return this.deselect();
+					return this.endTurn();
 				}
 
 				this.deselect();
@@ -89,15 +86,13 @@ export default {
 			if (this.isOnMove(x, y))
 			{
 				const selected = this.select(x, y);
-				selected.fromPos = {x, y};
 				selected.movmentMetrix = await this.generateMovmentMetrix(selected, x, y);
 			}
 		},
 
 		movePieceIfCan(toX, toY) {
-			if (this.selected?.fromPos) {
-				console.log(this.selected.fromPos.x, this.selected.fromPos.y);
-				this.put(this.selected.fromPos.x, this.selected.fromPos.y, null);
+			if (this.selected?.pos) {
+				this.put(this.selected.pos.x, this.selected.pos.y, null);
 				this.put(toX, toY, this.selected);
 			}
 		},
@@ -110,15 +105,17 @@ export default {
 						piece.movmentMetrix = null;
 				}
 			}
-			this.currentlyPlaying ^= 1;
+			this.onTurn ^= 1;
+			this.deselect();
 		},
 
 		isOnMove(x, y) {
-			return this.get(x, y)?.color == this.currentlyPlaying;
+			return this.get(x, y)?.color == this.onTurn && (this.myColor == null || this.myColor == this.onTurn);
 		},
 
 		select(x, y) {
 			this.selected = this.get(x, y);
+			this.selected.pos = {x, y};
 			this.selected.isSelected = true;
 			return this.selected;
 		},
@@ -155,14 +152,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.flip {
-	transform: scaleY(-1);
-
-	img.block {
-		transform: scaleY(-1);
-	}
-}
-
 .white {
 	background: lightgray;
 }

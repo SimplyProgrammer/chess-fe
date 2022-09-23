@@ -3,11 +3,11 @@
 		<p class="text-center bg-slate-600 text-white border-0 border-black border-solid border-b-4 m-0 py-1" @dblclick="copySessionId">{{game.session}}</p>
 
 		<div class="flex justify-center items-center h-[90%]">
-			<Chess-Board v-bind="game" class="w-full aspect-[1] max-w-[78vh]"
+			<Chess-Board v-bind="game" :whoStarts="game.onTurn" class="w-full aspect-[1] max-w-[78vh]"
 				:getOnMoveData="doMove"
 				:getMovmentMetrix="getMovmentMetrix"
 				@onMate="endGame"
-				@onTileClicked="onTileClicked" ref="chessBoard">
+				@onTileClicked="onTileClicked" ref="chessBoard" >
 			</Chess-Board>
 		</div>
 		
@@ -15,6 +15,13 @@
 			<p class="bg-black text-white m-0 h-12 w-full">Black</p>
 			<p class="bg-white text-black m-0 h-12 w-full">White</p>
 		</footer>
+	</div>
+	<div class="flex items-center flex-col" v-else>
+		<p class="font-bold">It looks like this game has expired or does not exist!</p>
+		<div class="flex">
+			<ion-button @click="$router.push('/')">Go back</ion-button>
+			<ion-button @click="connect(this, $route.params.session)">Retry</ion-button>
+		</div>
 	</div>
 </template>
 
@@ -43,31 +50,8 @@ export default {
 		}
 	},
 
-	async mounted() {
-		const comp = this;
-		
-		this.ws = new WebSocket(process.env.VUE_APP_API.replace(/https?/, "ws") + "game/" + this.$route.params.session);
-		this.ws.onopen = async function(event) {
-			console.log("Server connected." , event);
-		};
-		this.ws.onmessage = function(event) {
-			const data = JSON.parse(event.data);
-			if (data.type == "init") {
-				comp.game = data.data;
-			}
-			else if (data.type == "notifyMove") {
-				const board = comp.$refs.chessBoard, dt = data.data;
-
-				const piece = board.select(dt.fromX, dt.fromY);
-				piece.fromPos = {x: dt.fromX, y: dt.fromY};
-				console.log("notifyMove", piece);
-				board.movePieceIfCan(dt.toX, dt.toY);
-			}
-		};
-		this.ws.onclose = function (event){
-			console.log("Server disconnected." , event);
-			this.game = null;
-		};
+	mounted() {
+		this.connect(this, this.$route.params.session);
 	},
 
 	unmounted() {
@@ -77,6 +61,43 @@ export default {
 	methods: {
 		piece(color, name = "p", sprite = null) {
 			return {name, color};
+		},
+
+		connect(self, session) {
+			self.ws = new WebSocket(process.env.VUE_APP_API.replace(/https?/, "ws") + "game/" + session);
+
+			self.ws.onopen = function(event) {
+				console.log("Server connected." , event);
+			};
+
+			self.ws.onmessage = function(event) {
+				const data = JSON.parse(event.data);
+				if (data.type == "init") {
+					const game = self.game = data.data;
+					game.myColor = data.myColor;
+					for (let x = 0; x < game.pieces.length; x++) {
+						for (let y = 0; y < game.pieces[x].length; y++) {
+							const piece = game.pieces[y][x];
+							if (piece)
+								piece.sprite = require("@/assets/textures/" + piece.type + piece.color + ".png");
+						}
+					}
+				}
+				else if (data.type == "notifyMove") {
+					const board = self.$refs.chessBoard, dt = data.data;
+
+					board.select(dt.fromX, dt.fromY);
+					board.movePieceIfCan(dt.toX, dt.toY);
+					board.endTurn();
+				}
+			};
+
+			self.ws.onclose = function (event){
+				if (self.game) {
+					console.log("Server disconnected." , event);
+					self.game = null;
+				}
+			};
 		},
 
 		async endGame(isCheck, canMove, isStalemate, onMove) {
@@ -115,3 +136,13 @@ export default {
 	}
 }
 </script>
+
+<style lang="scss" scoped>
+.flip {
+	transform: scaleY(-1);
+
+	img.block {
+		transform: scaleY(-1);
+	}
+}
+</style>

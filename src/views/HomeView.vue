@@ -12,11 +12,11 @@
 </template>
 
 <script>
-import GameBrowser from "@/components/GameBrowser.vue";
+// import GameBrowser from "@/components/GameBrowser.vue";
 import Axios from "axios";
 
 export default {
-	components: {GameBrowser},
+	// components: {GameBrowser},
 
 	data() {
 		return {
@@ -48,7 +48,7 @@ export default {
 					this.$router.push("/game/" + session);
 				else {
 
-					const data = (await Axios.get(process.env.VUE_APP_API + "game/new")).data[0];
+					const data = (await Axios.get(process.env.VUE_APP_API + "game/join")).data[0];
 					console.log(data);
 					this.$router.push("/game/" + data);
 				}
@@ -58,13 +58,13 @@ export default {
 			}
 		},
 
-		async browseGames() {
-			this.gameBrowserModal = await this.modal(GameBrowser);
+		// async browseGames() {
+		// 	this.gameBrowserModal = await this.modal(GameBrowser);
 
-			const { data } = await this.gameBrowserModal.onDidDismiss();
-			if (data)
-				this.startGame(data.id);
-		},
+		// 	const { data } = await this.gameBrowserModal.onDidDismiss();
+		// 	if (data)
+		// 		this.startGame(data.id);
+		// },
 	}
 }
 </script>
