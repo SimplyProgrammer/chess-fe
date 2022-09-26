@@ -4,9 +4,9 @@
 
 		<div class="flex justify-center items-center h-[90%]">
 			<Chess-Board v-bind="game" :whoStarts="game.onTurn" class="w-full aspect-[1] max-w-[78vh]"
-				:getOnMoveData="doMove"
+				:getOnMoveData="getDoMove"
 				:getMovmentMetrix="getMovmentMetrix"
-				@onMate="endGame"
+				@onPieceMove="onPieceMove"
 				@onTileClicked="onTileClicked" ref="chessBoard" >
 			</Chess-Board>
 		</div>
@@ -86,6 +86,8 @@ export default {
 				else if (data.type == "notifyMove") {
 					const board = self.$refs.chessBoard, dt = data.data;
 
+					if (dt.isStalemate || (dt.isCheck && !dt.canMove))
+						self.endGame(dt.isCheck, dt.canMove, dt.isStalemate, board.onTurn);
 					board.select(dt.fromX, dt.fromY);
 					board.movePieceIfCan(dt.toX, dt.toY);
 					board.endTurn();
@@ -112,7 +114,12 @@ export default {
 			await alert.present();
 		},
 
-		doMove(fromX, fromY, toX, toY) {
+		onPieceMove(dt, piece) {
+			if (dt.isStalemate || (dt.isCheck && !dt.canMove))
+				self.endGame(dt.isCheck, dt.canMove, dt.isStalemate, this.$refs.chessBoard);
+		},
+
+		getDoMove(fromX, fromY, toX, toY) {
 			return this.ws.response("move", {fromX, fromY, toX, toY});
 		},
 

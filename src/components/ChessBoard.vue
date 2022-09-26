@@ -71,10 +71,7 @@ export default {
 
 					this.movePieceIfCan(x, y);
 
-					this.$emit('onPieceMove', x, y, this.selected)
-
-					if (data.isStalemate || (data.isCheck && !data.canMove))
-						this.$emit('onMate', data.isCheck, data.canMove, data.isStalemate, this.onTurn)
+					this.$emit('onPieceMove', data, this.selected);
 					
 					return this.endTurn();
 				}
