@@ -61,29 +61,21 @@ export default {
 		async onTileClicked(x, y) {
 			this.$emit('onTileClicked', x, y)
 
-			//Move piece
+			// //Move piece
 			if (this.selected)
 			{
 				if (this.canPieceMoveAt(x, y)) {
-					const data = await this.getOnMoveData(this.selected.pos.x, this.selected.pos.y, x, y);
-					if (!data)
-						return;
-
-					this.movePieceIfCan(x, y);
-
-					this.$emit('onPieceMove', data, this.selected);
-					
-					return this.endTurn();
+					return this.$emit('requestPieceMove', x, y, this.selected);
 				}
 
 				this.deselect();
 			}
 
-			//Select piece
+			// //Select piece
 			if (this.isOnMove(x, y))
 			{
 				const selected = this.select(x, y);
-				selected.movmentMetrix = await this.generateMovmentMetrix(selected, x, y);
+				this.$emit("onSelect", x, y, selected);
 			}
 		},
 
@@ -102,6 +94,7 @@ export default {
 						piece.movmentMetrix = null;
 				}
 			}
+
 			this.onTurn ^= 1;
 			this.deselect();
 		},
@@ -118,19 +111,10 @@ export default {
 		},
 
 		deselect() {
-			if (this.selected)
-			{
+			if (this.selected) {
 				this.selected.isSelected = false;
 				this.selected = null;
 			}
-		},
-
-		async generateMovmentMetrix(piece, x, y) {
-			if (piece.movmentMetrix)
-				return piece.movmentMetrix;
-			
-			const data = await this.getMovmentMetrix(x, y);;
-			return data;
 		},
 
 		canPieceMoveAt(x, y) {

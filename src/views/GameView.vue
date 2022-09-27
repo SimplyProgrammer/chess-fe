@@ -4,10 +4,9 @@
 
 		<div class="flex justify-center items-center h-[90%]">
 			<Chess-Board v-bind="game" :whoStarts="game.onTurn" class="w-full aspect-[1] max-w-[78vh]"
-				:getOnMoveData="getDoMove"
-				:getMovmentMetrix="getMovmentMetrix"
-				@onPieceMove="onPieceMove"
-				@onTileClicked="onTileClicked" ref="chessBoard" >
+				@requestPieceMove="doMove"
+				@onSelect="setMovmentMetrix"
+				ref="chessBoard" >
 			</Chess-Board>
 		</div>
 		
@@ -83,7 +82,7 @@ export default {
 						}
 					}
 				}
-				else if (data.type == "notifyMove") {
+				else if (data.type == "move") {
 					const board = self.$refs.chessBoard, dt = data.data;
 
 					if (dt.isStalemate || (dt.isCheck && !dt.canMove))
@@ -114,17 +113,13 @@ export default {
 			await alert.present();
 		},
 
-		onPieceMove(dt, piece) {
-			if (dt.isStalemate || (dt.isCheck && !dt.canMove))
-				self.endGame(dt.isCheck, dt.canMove, dt.isStalemate, this.$refs.chessBoard);
+		async doMove(x, y, selected) {
+			return await this.ws.response("move", {fromX: selected.pos.x, fromY: selected.pos.y, toX: x, toY: y});
 		},
 
-		getDoMove(fromX, fromY, toX, toY) {
-			return this.ws.response("move", {fromX, fromY, toX, toY});
-		},
-
-		getMovmentMetrix(x, y) {
-			return this.ws.response("movmentMetrix", {x, y});
+		async setMovmentMetrix(x, y, selected) {
+			const request = await this.ws.response("movmentMetrix", {x, y});
+			return selected.movmentMetrix = request;
 		},
 
 		async copySessionId() {
@@ -135,10 +130,6 @@ export default {
 			catch (e) {
 				console.error(e);
 			}
-		},
-
-		onTileClicked(x, y) {
-		
 		}
 	}
 }
