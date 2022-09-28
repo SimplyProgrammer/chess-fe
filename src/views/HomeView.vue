@@ -47,7 +47,6 @@ export default {
 				if (session) 
 					this.$router.push("/game/" + session);
 				else {
-
 					const data = (await Axios.get(process.env.VUE_APP_API + "game/join")).data[0];
 					console.log(data);
 					this.$router.push("/game/" + data);

@@ -53,11 +53,12 @@ export default {
 				return modal;
 			},
 	
-			async toast(message, color = "success", duration = 2500) {
+			async toast(message, color = "success", duration = 2500, options = {}) {
 				const toast = await this.toastController.create({
 					color: color,
 					message: message,
 					duration: duration,
+					...options
 				});
 				toast.present();
 				toast.onclick = () => toast.dismiss();

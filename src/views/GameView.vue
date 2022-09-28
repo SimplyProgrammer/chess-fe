@@ -16,9 +16,9 @@
 		</footer>
 	</div>
 	<div class="flex items-center flex-col" v-else>
-		<p class="font-bold">It looks like this game has expired or does not exist!</p>
+		<p class="font-bold text-center">It looks like this game has expired or does not exist!<br>Check your connection or try again later!</p>
 		<div class="flex">
-			<ion-button @click="$router.push('/')">Go back</ion-button>
+			<ion-button @click="$router.push('/')">Exit</ion-button>
 			<ion-button @click="connect(this, $route.params.session)">Retry</ion-button>
 		</div>
 	</div>
@@ -46,15 +46,24 @@ export default {
 			// ],
 
 			game: null,
+			ws: null
 		}
 	},
 
 	mounted() {
+		window.onfocus = ev => {
+			if (!this.ws)
+				this.connect(this, this.$route.params.session);
+		}
+
 		this.connect(this, this.$route.params.session);
 	},
 
 	unmounted() {
-		this.ws.close();
+		if (this.ws) {
+			this.ws.close();
+			this.game = this.ws = null;
+		}
 	},
 
 	methods: {
@@ -65,15 +74,20 @@ export default {
 		connect(self, session) {
 			self.ws = new WebSocket(process.env.VUE_APP_API.replace(/https?/, "ws") + "game/" + session);
 
-			self.ws.onopen = function(event) {
+			self.ws.onopen = (event) => {
 				console.log("Server connected." , event);
 			};
 
-			self.ws.onmessage = function(event) {
+			self.ws.onerror = (event) => {
+				self.toast("Connection with server failed!", "danger");
+			}
+
+			self.ws.onmessage = (event) => {
 				const data = JSON.parse(event.data);
 				if (data.type == "init") {
 					const game = self.game = data.data;
 					game.myColor = data.myColor;
+
 					for (let x = 0; x < game.pieces.length; x++) {
 						for (let y = 0; y < game.pieces[x].length; y++) {
 							const piece = game.pieces[y][x];
@@ -81,24 +95,31 @@ export default {
 								piece.sprite = require("@/assets/textures/" + piece.type + piece.color + ".png");
 						}
 					}
+
+					self.toast("You are " + (game.myColor > 1 ? "spectating!" : game.myColor ? "playing as white!" : "playing as black!"), "success", 950, {
+						position: "middle",
+						cssClass: "text-center"
+					});
 				}
 				else if (data.type == "move") {
 					const board = self.$refs.chessBoard, dt = data.data;
 
-					if (dt.isStalemate || (dt.isCheck && !dt.canMove))
-						self.endGame(dt.isCheck, dt.canMove, dt.isStalemate, board.onTurn);
 					board.select(dt.fromX, dt.fromY);
 					board.movePieceIfCan(dt.toX, dt.toY);
+					if (dt.isStalemate || (dt.isCheck && !dt.canMove))
+						self.endGame(dt.isCheck, dt.canMove, dt.isStalemate, board.onTurn);
+
 					board.endTurn();
 				}
 			};
 
-			self.ws.onclose = function (event){
+			self.ws.onclose = (event) => {
 				if (self.game) {
 					console.log("Server disconnected." , event);
-					self.game = null;
+					self.ws = self.game = null;
 				}
 			};
+
 		},
 
 		async endGame(isCheck, canMove, isStalemate, onMove) {
