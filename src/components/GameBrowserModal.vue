@@ -20,6 +20,7 @@
 
 <script>
 import Axios from "axios";
+import { modalController } from "@ionic/vue";
 
 export default {
 	data() {
@@ -30,7 +31,7 @@ export default {
 
 	methods: {
 		selectGame(id) {
-			return this.modalController.dismiss({
+			return modalController.dismiss({
 				id
 			});
 		},

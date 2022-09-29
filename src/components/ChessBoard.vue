@@ -5,9 +5,9 @@
 				{'hover:bg-slate-600': isOnMove(x, y)},
 				{'bg-slate-600': get(x, y)?.isSelected}, 
 				(x + y) % 2 ? 'black' : 'white'
-			]" @click="onTileClicked(x, y)">
+			]" @click="onTileClicked(x, y)" @drop.prevent="dropPiece(x, y)" @dragenter.prevent @dragover.prevent>
 				<div v-if="canPieceMoveAt(x, y)" class="absolute w-[50%] h-[50%] top-1/4 left-1/4 rounded-full bg-slate-500 opacity-70"></div>
-				<img :src="get(x, y)?.sprite" class="block">
+				<img :src="get(x, y)?.sprite" @dragstart="dragPiece(x, y)" :draggable="isOnMove(x, y)" class="block">
 				<!-- <p class="absolute top-1/4 left-1/4 text-cyan-400">[{{x}}, {{y}}]</p> -->
 			</div>
 		</template>
@@ -40,30 +40,37 @@ export default {
 			type: Number,
 			default: 0
 		},
-		getOnMoveData: {
-			type: Function
-		},
-		getMovmentMetrix: {
-			type: Function
-		},
 		myColor: {
 			type: Number,
 			default: null
+		},
+		draggable: {
+			type: Boolean,
+			default: true
 		}
 	},
 	
 	mounted() {
 		this.onTurn = this.whoStarts;
-		console.log(this.onTurn, this.myColor);
 	},
 
 	methods: {
-		async onTileClicked(x, y) {
+		dropPiece(x, y) {
+			if (this.draggable)
+				this.onTileClicked(x, y);
+		},
+
+		dragPiece(x, y) {
+			if (this.draggable && this.isOnMove(x, y)) {
+				this.select(x, y);
+			}
+		},
+
+		onTileClicked(x, y) {
 			this.$emit('onTileClicked', x, y)
 
 			// //Move piece
-			if (this.selected)
-			{
+			if (this.selected) {
 				if (this.canPieceMoveAt(x, y)) {
 					return this.$emit('requestPieceMove', x, y, this.selected);
 				}
@@ -72,10 +79,8 @@ export default {
 			}
 
 			// //Select piece
-			if (this.isOnMove(x, y))
-			{
-				const selected = this.select(x, y);
-				this.$emit("onSelect", x, y, selected);
+			if (this.isOnMove(x, y)) {
+				this.select(x, y);
 			}
 		},
 
@@ -83,6 +88,7 @@ export default {
 			if (this.selected?.pos) {
 				this.put(this.selected.pos.x, this.selected.pos.y, null);
 				this.put(toX, toY, this.selected);
+				return this.selected;
 			}
 		},
 
@@ -107,6 +113,7 @@ export default {
 			this.selected = this.get(x, y);
 			this.selected.pos = {x, y};
 			this.selected.isSelected = true;
+			this.$emit("onSelect", x, y, this.selected);
 			return this.selected;
 		},
 

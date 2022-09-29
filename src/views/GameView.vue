@@ -25,12 +25,13 @@
 </template>
 
 <script>
+import PromotionModal from "@/components/PromotionModal.vue";
 import ChessBoard from "@/components/ChessBoard.vue";
 import Axios from "axios";
 import {alertController} from "@ionic/vue";
 
 export default {
-	components: {ChessBoard},
+	components: {PromotionModal, ChessBoard},
 
 	data() {
 		return {
@@ -45,6 +46,12 @@ export default {
 			// 	[this.piece(1, "r"), this.piece(1, "n"), this.piece(1, "b"), this.piece(1, "q"), this.piece(1, "k"), this.piece(1, "b"), this.piece(1, "n"), this.piece(1, "r")]
 			// ],
 
+			promotions: [
+				this.piece(0, "q"),
+				this.piece(0, "r"),
+				this.piece(0, "b"),
+				this.piece(0, "n"),
+			],
 			game: null,
 			ws: null
 		}
@@ -60,6 +67,7 @@ export default {
 	},
 
 	unmounted() {
+		window.onfocus = null;
 		if (this.ws) {
 			this.ws.close();
 			this.game = this.ws = null;
@@ -67,8 +75,8 @@ export default {
 	},
 
 	methods: {
-		piece(color, name = "p", sprite = null) {
-			return {name, color};
+		piece(color = 0, type = "p", sprite = null) {
+			return {type, color, sprite: sprite ?? require("@/assets/textures/" + type + color + ".png")};
 		},
 
 		connect(self, session) {
@@ -76,13 +84,14 @@ export default {
 
 			self.ws.onopen = (event) => {
 				console.log("Server connected." , event);
-			};
+			}
 
 			self.ws.onerror = (event) => {
 				self.toast("Connection with server failed!", "danger");
+				console.log(event);
 			}
 
-			self.ws.onmessage = (event) => {
+			self.ws.onmessage = async (event) => {
 				const data = JSON.parse(event.data);
 				if (data.type == "init") {
 					const game = self.game = data.data;
@@ -105,21 +114,22 @@ export default {
 					const board = self.$refs.chessBoard, dt = data.data;
 
 					board.select(dt.fromX, dt.fromY);
-					board.movePieceIfCan(dt.toX, dt.toY);
+					const piece = board.movePieceIfCan(dt.toX, dt.toY);
+					if (dt.promote)
+						Object.assign(piece, self.piece(piece.color, dt.promote))
 					if (dt.isStalemate || (dt.isCheck && !dt.canMove))
 						self.endGame(dt.isCheck, dt.canMove, dt.isStalemate, board.onTurn);
 
 					board.endTurn();
 				}
-			};
+			}
 
 			self.ws.onclose = (event) => {
 				if (self.game) {
 					console.log("Server disconnected." , event);
 					self.ws = self.game = null;
 				}
-			};
-
+			}
 		},
 
 		async endGame(isCheck, canMove, isStalemate, onMove) {
@@ -135,12 +145,27 @@ export default {
 		},
 
 		async doMove(x, y, selected) {
-			return await this.ws.response("move", {fromX: selected.pos.x, fromY: selected.pos.y, toX: x, toY: y});
+			const data = {fromX: selected.pos.x, fromY: selected.pos.y, toX: x, toY: y}, board = this.$refs.chessBoard;
+			if (selected.type == "p" && (y >= board.h - 1 || y <= 0))
+				data.promote = await this.openPromotionModal();
+			return await this.ws.response("move", data);
 		},
 
 		async setMovmentMetrix(x, y, selected) {
 			const request = await this.ws.response("movmentMetrix", {x, y});
 			return selected.movmentMetrix = request;
+		},
+
+		async openPromotionModal() {
+			this.promotionModal = await this.modal(PromotionModal, {
+				promotions: this.promotions
+			});
+
+			const { data } = await this.promotionModal.onDidDismiss();
+			if (data?.piece?.type) {
+				return data.piece.type;
+			}
+			return "q";
 		},
 
 		async copySessionId() {

@@ -4,7 +4,7 @@
 			<h1 class="text-9xl mb-32 text-center">Simple Chess</h1>
 			<div class="flex flex-col items-center w-3/5">
 				<ion-button class="w-full font-bold" @click="startGame(sessionInput)">{{sessionInput ? 'Join existing game' : 'Start game'}}</ion-button>
-				<ion-input v-model="sessionInput" class="rounded-md bg-slate-300 mt-3 ion-padding-horizontal" placeholder="Or enter token of game"></ion-input>
+				<ion-input v-model="sessionInput" class="rounded-md bg-slate-300 mt-3 ion-padding-horizontal" placeholder="Or enter token of game" @dblclick="pasteText" ref="input"></ion-input>
 				<!-- <ion-button class="mt-10 font-bold w-7/12" @click="browseGames">Browse existing games</ion-button> -->
 			</div>
 		</div>
@@ -56,6 +56,10 @@ export default {
 				this.toast(e, "danger");
 			}
 		},
+
+		async pasteText() {
+			this.sessionInput = await navigator.clipboard.readText();
+		}
 
 		// async browseGames() {
 		// 	this.gameBrowserModal = await this.modal(GameBrowser);
