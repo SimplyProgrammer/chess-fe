@@ -159,12 +159,32 @@
   bottom: 0px !important
 }
 
-.m-0 {
-  margin: 0px !important
+.top-1\/4 {
+  top: 25% !important
 }
 
-.m-11 {
-  margin: 2.75rem !important
+.left-1\/4 {
+  left: 25% !important
+}
+
+.top-1\/4 {
+  top: 25% !important
+}
+
+.left-1\/4 {
+  left: 25% !important
+}
+
+.top-1\/4 {
+  top: 25% !important
+}
+
+.left-1\/4 {
+  left: 25% !important
+}
+
+.m-0 {
+  margin: 0px !important
 }
 
 .mx-4 {
@@ -224,6 +244,10 @@
   height: 3rem !important
 }
 
+.h-\[50\%\] {
+  height: 50% !important
+}
+
 .w-\[50\%\] {
   width: 50% !important
 }
@@ -240,8 +264,8 @@
   width: 58.333333% !important
 }
 
-.w-full {
-  width: 100% !important
+.w-\[50\%\] {
+  width: 50% !important
 }
 
 .max-w-\[78vh\] {
@@ -260,6 +284,10 @@
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important
 }
 
+.grid-cols-8 {
+  grid-template-columns: repeat(8, minmax(0, 1fr)) !important
+}
+
 .flex-col {
   flex-direction: column !important
 }
@@ -274,14 +302,6 @@
 
 .justify-between {
   justify-content: space-between !important
-}
-
-.gap-11 {
-  gap: 2.75rem !important
-}
-
-.gap-10 {
-  gap: 2.5rem !important
 }
 
 .gap-8 {
@@ -300,12 +320,28 @@
   border-radius: 0.375rem !important
 }
 
+.rounded-full {
+  border-radius: 9999px !important
+}
+
+.border-8 {
+  border-width: 8px !important
+}
+
 .border-0 {
   border-width: 0px !important
 }
 
 .border-2 {
   border-width: 2px !important
+}
+
+.border-4 {
+  border-width: 4px !important
+}
+
+.border {
+  border-width: 1px !important
 }
 
 .border-b-4 {
@@ -316,9 +352,19 @@
   border-style: solid !important
 }
 
+.border-green-500 {
+  --tw-border-opacity: 1 !important;
+  border-color: rgb(34 197 94 / var(--tw-border-opacity)) !important
+}
+
 .border-black {
   --tw-border-opacity: 1 !important;
   border-color: rgb(0 0 0 / var(--tw-border-opacity)) !important
+}
+
+.border-green-500 {
+  --tw-border-opacity: 1 !important;
+  border-color: rgb(34 197 94 / var(--tw-border-opacity)) !important
 }
 
 .bg-slate-600 {
@@ -351,12 +397,38 @@
   background-color: rgb(203 213 225 / var(--tw-bg-opacity)) !important
 }
 
-.p-1 {
-  padding: 0.25rem !important
+.bg-slate-600 {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(71 85 105 / var(--tw-bg-opacity)) !important
 }
 
-.p-10 {
-  padding: 2.5rem !important
+.bg-slate-500 {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(100 116 139 / var(--tw-bg-opacity)) !important
+}
+
+.bg-slate-600 {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(71 85 105 / var(--tw-bg-opacity)) !important
+}
+
+.bg-slate-500 {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(100 116 139 / var(--tw-bg-opacity)) !important
+}
+
+.bg-slate-600 {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(71 85 105 / var(--tw-bg-opacity)) !important
+}
+
+.bg-slate-500 {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(100 116 139 / var(--tw-bg-opacity)) !important
+}
+
+.p-1 {
+  padding: 0.25rem !important
 }
 
 .p-5 {
@@ -396,13 +468,18 @@
   color: rgb(0 0 0 / var(--tw-text-opacity)) !important
 }
 
+.text-cyan-400 {
+  --tw-text-opacity: 1 !important;
+  color: rgb(34 211 238 / var(--tw-text-opacity)) !important
+}
+
 .opacity-70 {
   opacity: 0.7 !important
 }
 
-.shadow-sm {
-  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
-  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color) !important;
+.shadow-inner {
+  --tw-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05) !important;
+  --tw-shadow-colored: inset 0 2px 4px 0 var(--tw-shadow-color) !important;
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important
 }
 
@@ -417,12 +494,6 @@
 .hover\:bg-slate-600:hover {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(71 85 105 / var(--tw-bg-opacity)) !important
-}
-
-.hover\:shadow-sm:hover {
-  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
-  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color) !important;
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow) !important
 }
 
 .hover\:shadow-lg:hover {

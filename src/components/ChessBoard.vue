@@ -4,10 +4,12 @@
 			<div v-for="(col, x) in w" :key="x" class="relative aspect-[1]" :class="[
 				{'hover:bg-slate-600': isOnMove(x, y)},
 				{'bg-slate-600': get(x, y)?.isSelected}, 
-				(x + y) % 2 ? 'black' : 'white'
+				(x + y) % 2 ? 'black' : 'white',
+				{'moved-from': lastMove?.fromX == x && lastMove?.fromY == y},
+				{'moved-to': lastMove?.toX == x && lastMove?.toY == y}
 			]" @click="onTileClicked(x, y)" @drop.prevent="dropPiece(x, y)" @dragenter.prevent @dragover.prevent>
 				<div v-if="canPieceMoveAt(x, y)" class="absolute w-[50%] h-[50%] top-1/4 left-1/4 rounded-full bg-slate-500 opacity-70"></div>
-				<img :src="get(x, y)?.sprite" @dragstart="dragPiece(x, y)" :draggable="isOnMove(x, y)" class="block">
+				<img :src="get(x, y)?.sprite" @dragstart="dragPiece(x, y)" :draggable="draggable && isOnMove(x, y)" class="block">
 				<!-- <p class="absolute top-1/4 left-1/4 text-cyan-400">[{{x}}, {{y}}]</p> -->
 			</div>
 		</template>
@@ -19,7 +21,7 @@ export default {
 	data() {
 		return {
 			selected: null,
-			onTurn: 0
+			onTurn: 0,
 		}
 	},
 
@@ -47,6 +49,10 @@ export default {
 		draggable: {
 			type: Boolean,
 			default: true
+		},
+		lastMove: {
+			type: Object,
+			default: {}
 		}
 	},
 	
@@ -88,6 +94,7 @@ export default {
 			if (this.selected?.pos) {
 				this.put(this.selected.pos.x, this.selected.pos.y, null);
 				this.put(toX, toY, this.selected);
+				// this.lastMove = {fromX: this.selected.pos.x, fromY: this.selected.pos.y, toX, toY}
 				return this.selected;
 			}
 		},
@@ -146,5 +153,13 @@ export default {
 
 .black {
 	background: #752d1e;
+}
+
+.moved-from {
+	box-shadow: inset 0 0 6px 4px limegreen;
+}
+
+.moved-to {
+	box-shadow: inset 0 0 6px 7px limegreen;
 }
 </style>

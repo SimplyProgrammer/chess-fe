@@ -44,7 +44,6 @@ export default {
 			// 	[],
 			// 	[this.piece(1), this.piece(1), this.piece(1), this.piece(1), this.piece(1), this.piece(1), this.piece(1), this.piece(1)],
 			// 	[this.piece(1, "r"), this.piece(1, "n"), this.piece(1, "b"), this.piece(1, "q"), this.piece(1, "k"), this.piece(1, "b"), this.piece(1, "n"), this.piece(1, "r")]
-			// ],
 
 			promotions: [
 				this.piece(0, "q"),
@@ -115,11 +114,12 @@ export default {
 
 					board.select(dt.fromX, dt.fromY);
 					const piece = board.movePieceIfCan(dt.toX, dt.toY);
-					if (dt.promote)
+					if (piece && dt.promote)
 						Object.assign(piece, self.piece(piece.color, dt.promote))
 					if (dt.isStalemate || (dt.isCheck && !dt.canMove))
 						self.endGame(dt.isCheck, dt.canMove, dt.isStalemate, board.onTurn);
 
+					self.game.lastMove = {fromX: dt.fromX, fromY: dt.fromY, toX: dt.toX, toY: dt.toY};
 					board.endTurn();
 				}
 			}
