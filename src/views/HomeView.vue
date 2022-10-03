@@ -3,6 +3,8 @@
 		<div class="flex flex-col items-center">
 			<h1 class="text-9xl mb-32 text-center">Simple Chess</h1>
 			<div class="flex flex-col items-center w-3/5">
+				<ion-button class="w-full font-bold mb-10" @click="startGame(null, true)">{{'Singleplayer game'}}</ion-button>
+
 				<ion-button class="w-full font-bold" @click="startGame(sessionInput)">{{sessionInput ? 'Join existing game' : 'Start game'}}</ion-button>
 				<ion-input v-model="sessionInput" class="rounded-md bg-slate-300 mt-3 ion-padding-horizontal" placeholder="Or enter token of game" @dblclick="pasteText" ref="input"></ion-input>
 				<!-- <ion-button class="mt-10 font-bold w-7/12" @click="browseGames">Browse existing games</ion-button> -->
@@ -42,12 +44,12 @@ export default {
 			return this.startNewGame();
 		},
 
-		async startGame(session = null) {
+		async startGame(session = null, singleplayer = false) {
 			try {
 				if (session) 
 					this.$router.push("/game/" + session);
 				else {
-					const data = (await Axios.get(process.env.VUE_APP_API + "game/join")).data[0];
+					const data = (await Axios.get(process.env.VUE_APP_API + "game/join" + (singleplayer ? "?singleplayer=true" : ""))).data[0];
 					console.log(data);
 					this.$router.push("/game/" + data);
 				}

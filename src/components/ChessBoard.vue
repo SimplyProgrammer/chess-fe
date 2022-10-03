@@ -4,12 +4,10 @@
 			<div v-for="(col, x) in w" :key="x" class="relative aspect-[1]" :class="[
 				{'hover:bg-slate-600': isOnMove(x, y)},
 				{'bg-slate-600': get(x, y)?.isSelected}, 
-				(x + y) % 2 ? 'black' : 'white',
-				{'moved-from': lastMove?.fromX == x && lastMove?.fromY == y},
-				{'moved-to': lastMove?.toX == x && lastMove?.toY == y}
-			]" @click="onTileClicked(x, y)" @drop.prevent="dropPiece(x, y)" @dragenter.prevent @dragover.prevent>
+				(x + y) % 2 ? 'black' : 'white'
+			]" :style="getMark(x, y)" @click="onTileClicked(x, y)" @drop.prevent="dropPiece(x, y)" @dragenter.prevent @dragover.prevent>
 				<div v-if="canPieceMoveAt(x, y)" class="absolute w-[50%] h-[50%] top-1/4 left-1/4 rounded-full bg-slate-500 opacity-70"></div>
-				<img :src="get(x, y)?.sprite" @dragstart="dragPiece(x, y)" :draggable="draggable && isOnMove(x, y)" class="block">
+				<img :src="get(x, y)?.sprite" @dragstart="dragPiece(x, y)" :draggable="draggable && isOnMove(x, y)" class="block z-10">
 				<!-- <p class="absolute top-1/4 left-1/4 text-cyan-400">[{{x}}, {{y}}]</p> -->
 			</div>
 		</template>
@@ -20,6 +18,7 @@
 export default {
 	data() {
 		return {
+			markedTiles: [],
 			selected: null,
 			onTurn: 0,
 		}
@@ -49,15 +48,15 @@ export default {
 		draggable: {
 			type: Boolean,
 			default: true
-		},
-		lastMove: {
-			type: Object,
-			default: {}
 		}
 	},
 	
 	mounted() {
 		this.onTurn = this.whoStarts;
+
+		this.markedTiles = new Array(this.h);
+		for (var i = 0; i < this.h; i++)
+			this.markedTiles[i] = new Array(this.w);
 	},
 
 	methods: {
@@ -92,8 +91,13 @@ export default {
 
 		movePieceIfCan(toX, toY) {
 			if (this.selected?.pos) {
-				this.put(this.selected.pos.x, this.selected.pos.y, null);
-				this.put(toX, toY, this.selected);
+				// const selectedSprite = document.getElementById(toX + "," + toY);
+				// console.log(selectedSprite);
+				// selectedSprite.style.setProperty('top', '150px', 'important');
+
+				const selected = this.selected;
+				this.put(selected.pos.x, selected.pos.y);
+				this.put(toX, toY, selected);
 				// this.lastMove = {fromX: this.selected.pos.x, fromY: this.selected.pos.y, toX, toY}
 				return this.selected;
 			}
@@ -135,6 +139,20 @@ export default {
 			return this.selected?.isSelected && !this.isOnMove(x, y) && this.selected?.movmentMetrix?.[y]?.[x];
 		},
 
+		getMark(x, y) {
+			const mark = this.markedTiles?.[y]?.[x];
+			if (mark) {
+				return {
+					"box-shadow": `inset ${mark.offsetX ?? 0}px ${mark.offsetY ?? 0}px  ${mark.smooth ?? 6}px ${mark.spread ?? 2}px ${mark.color ?? "limegreen"}`
+				}
+			}
+			return undefined;
+		},
+
+		setMark(x, y, mark) {
+			this.markedTiles[y][x] = mark;
+		}, 
+
 		get(x, y) {
 			return this.pieces?.[y]?.[x];
 		},
@@ -153,13 +171,5 @@ export default {
 
 .black {
 	background: #752d1e;
-}
-
-.moved-from {
-	box-shadow: inset 0 0 6px 4px limegreen;
-}
-
-.moved-to {
-	box-shadow: inset 0 0 6px 7px limegreen;
 }
 </style>

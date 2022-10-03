@@ -10,10 +10,10 @@
 			</Chess-Board>
 		</div>
 		
-		<footer class="absolute bottom-0 flex justify-between w-full border-2 border-black border-solid">
+		<!-- <footer class="absolute bottom-0 flex justify-between w-full border-2 border-black border-solid">
 			<p class="bg-black text-white m-0 h-12 w-full">Black</p>
 			<p class="bg-white text-black m-0 h-12 w-full">White</p>
-		</footer>
+		</footer> -->
 	</div>
 	<div class="flex items-center flex-col" v-else>
 		<p class="font-bold text-center">It looks like this game has expired or does not exist!<br>Check your connection or try again later!</p>
@@ -45,12 +45,6 @@ export default {
 			// 	[this.piece(1), this.piece(1), this.piece(1), this.piece(1), this.piece(1), this.piece(1), this.piece(1), this.piece(1)],
 			// 	[this.piece(1, "r"), this.piece(1, "n"), this.piece(1, "b"), this.piece(1, "q"), this.piece(1, "k"), this.piece(1, "b"), this.piece(1, "n"), this.piece(1, "r")]
 
-			promotions: [
-				this.piece(0, "q"),
-				this.piece(0, "r"),
-				this.piece(0, "b"),
-				this.piece(0, "n"),
-			],
 			game: null,
 			ws: null
 		}
@@ -95,6 +89,7 @@ export default {
 				if (data.type == "init") {
 					const game = self.game = data.data;
 					game.myColor = data.myColor;
+					console.log(game);
 
 					for (let x = 0; x < game.pieces.length; x++) {
 						for (let y = 0; y < game.pieces[x].length; y++) {
@@ -104,6 +99,10 @@ export default {
 						}
 					}
 
+					setTimeout(() => {
+						if (game.lastMove)
+							self.markMove(game.lastMove);
+					}, 10) ;
 					self.toast("You are " + (game.myColor > 1 ? "spectating!" : game.myColor ? "playing as white!" : "playing as black!"), "success", 950, {
 						position: "middle",
 						cssClass: "text-center"
@@ -119,7 +118,7 @@ export default {
 					if (dt.isStalemate || (dt.isCheck && !dt.canMove))
 						self.endGame(dt.isCheck, dt.canMove, dt.isStalemate, board.onTurn);
 
-					self.game.lastMove = {fromX: dt.fromX, fromY: dt.fromY, toX: dt.toX, toY: dt.toY};
+					this.markMove(dt);
 					board.endTurn();
 				}
 			}
@@ -130,6 +129,22 @@ export default {
 					self.ws = self.game = null;
 				}
 			}
+		},
+
+		markMove(move) {
+			const board = this.$refs.chessBoard;
+			if (this.lastMove) {
+				board.setMark(this.lastMove.fromX, this.lastMove.fromY);
+				board.setMark(this.lastMove.toX, this.lastMove.toY);
+				if (this.lastMove.isCheck)
+					board.setMark(this.lastMove.isCheck.x, this.lastMove.isCheck.y);
+			}
+
+			console.log(this.lastMove = move);
+			board.setMark(move.fromX, move.fromY, {spread: 4, color: "var(--ion-color-success)"});
+			board.setMark(move.toX, move.toY, {spread: 7, color: "var(--ion-color-success)"});
+			if (move.isCheck)
+				board.setMark(move.isCheck.x, move.isCheck.y, {spread: !move.canMove ? 999 : 8, color: "var(--ion-color-danger-shade)"});
 		},
 
 		async endGame(isCheck, canMove, isStalemate, onMove) {
@@ -147,7 +162,7 @@ export default {
 		async doMove(x, y, selected) {
 			const data = {fromX: selected.pos.x, fromY: selected.pos.y, toX: x, toY: y}, board = this.$refs.chessBoard;
 			if (selected.type == "p" && (y >= board.h - 1 || y <= 0))
-				data.promote = await this.openPromotionModal();
+				data.promote = await this.openPromotionModal(selected.color);
 			return await this.ws.response("move", data);
 		},
 
@@ -156,9 +171,14 @@ export default {
 			return selected.movmentMetrix = request;
 		},
 
-		async openPromotionModal() {
+		async openPromotionModal(color = 0) {
 			this.promotionModal = await this.modal(PromotionModal, {
-				promotions: this.promotions
+				promotions: [
+					this.piece(color, "q"),
+					this.piece(color, "n"),
+					this.piece(color, "r"),
+					this.piece(color, "b"),
+				]
 			});
 
 			const { data } = await this.promotionModal.onDidDismiss();
